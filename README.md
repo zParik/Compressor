@@ -3,6 +3,7 @@
 Compress videos to fit Discord's upload limits using two-pass H.264 encoding.
 No limits, no sign-ups, no BS.
 
+###### Built for my friends and I, no more dealing with limits on other sites xD.
 ## Download
 
 Grab the latest release for your OS from the [Releases page](https://github.com/zParik/Compressor/releases/latest):
