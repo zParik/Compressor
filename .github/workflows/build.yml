@@ -13,7 +13,7 @@ jobs:
           - os: windows-latest
             artifact: SquishIt-windows.exe
             binary: dist/SquishIt.exe
-          - os: ubuntu-20.04        # older = wider glibc compat
+          - os: ubuntu-22.04
             artifact: SquishIt-linux
             binary: dist/SquishIt
           - os: macos-latest
