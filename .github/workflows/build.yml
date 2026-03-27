@@ -1,0 +1,113 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: SquishIt-windows.exe
+            binary: dist/SquishIt.exe
+          - os: ubuntu-22.04
+            artifact: SquishIt-linux
+            binary: dist/SquishIt
+          - os: macos-latest
+            artifact: SquishIt-mac
+            binary: dist/SquishIt
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps
+        run: pip install flask pyinstaller
+
+      # ── ffmpeg: Windows ──────────────────────────────────────────
+      - name: Download ffmpeg (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path ffmpeg
+          $url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
+          Invoke-WebRequest -Uri $url -OutFile ffmpeg_tmp.zip -UseBasicParsing
+          Expand-Archive -Path ffmpeg_tmp.zip -DestinationPath ffmpeg_extracted -Force
+          $bin = Get-ChildItem ffmpeg_extracted -Recurse -Filter ffmpeg.exe | Select-Object -First 1
+          Copy-Item $bin.FullName ffmpeg\ffmpeg.exe
+          $bin2 = Get-ChildItem ffmpeg_extracted -Recurse -Filter ffprobe.exe | Select-Object -First 1
+          Copy-Item $bin2.FullName ffmpeg\ffprobe.exe
+
+      # ── ffmpeg: Linux ────────────────────────────────────────────
+      - name: Download ffmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p ffmpeg
+          curl -L "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz" -o ffmpeg_tmp.tar.xz
+          mkdir ffmpeg_extracted
+          tar -xf ffmpeg_tmp.tar.xz -C ffmpeg_extracted --strip-components=1
+          cp ffmpeg_extracted/ffmpeg ffmpeg/
+          cp ffmpeg_extracted/ffprobe ffmpeg/
+          chmod +x ffmpeg/ffmpeg ffmpeg/ffprobe
+
+      # ── ffmpeg: Mac ──────────────────────────────────────────────
+      - name: Download ffmpeg (Mac)
+        if: runner.os == 'macOS'
+        run: |
+          brew install ffmpeg --quiet
+          mkdir -p ffmpeg
+          cp "$(which ffmpeg)" ffmpeg/
+          cp "$(which ffprobe)" ffmpeg/
+
+      # ── Build ────────────────────────────────────────────────────
+      - name: Build with PyInstaller
+        run: python -m PyInstaller squishit.spec --noconfirm --clean
+
+      - name: Rename binary
+        shell: bash
+        run: mv "${{ matrix.binary }}" "${{ matrix.artifact }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            SquishIt-windows.exe
+            SquishIt-linux
+            SquishIt-mac
+          body: |
+            ## SquishIt ${{ github.ref_name }}
+
+            Download the right file for your OS:
+            | OS | File |
+            |---|---|
+            | Windows | `SquishIt-windows.exe` |
+            | Linux | `SquishIt-linux` |
+            | Mac | `SquishIt-mac` |
+
+            **Linux/Mac:** after downloading, run `chmod +x SquishIt-*` then double-click or `./SquishIt-*`
