@@ -43,7 +43,7 @@ body {
   font-kerning: normal;
 }
 
-/* ── Background art ─────────────────────── */
+/* Background art */
 .bg-art {
   position: fixed; inset: 0; pointer-events: none; z-index: 0;
   overflow: hidden;
@@ -77,7 +77,7 @@ body {
   66% { transform: translate(-20px,50px) scale(0.95); }
 }
 
-/* ── Grain ────────────────────────────────── */
+/* Subtle film grain overlay */
 body::after {
   content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
@@ -86,7 +86,7 @@ body::after {
 
 .wrap { position:relative; z-index:2; max-width:700px; margin:0 auto; padding:0 20px; }
 
-/* ── Header ──────────────────────────────── */
+/* Header */
 header {
   padding: 28px 0 8px;
   display: flex;
@@ -123,7 +123,7 @@ header .chip {
   text-transform: uppercase;
 }
 
-/* ── Hero ─────────────────────────────────── */
+/* Hero */
 .hero {
   text-align: center;
   padding: 44px 0 36px;
@@ -146,7 +146,7 @@ header .chip {
   margin: 0 auto;
 }
 
-/* ── Size Presets ─────────────────────────── */
+/* Size presets */
 .presets {
   display: flex;
   gap: 8px;
@@ -188,7 +188,7 @@ header .chip {
   background: oklch(76% 0.17 128 / 0.2);
 }
 
-/* ── Quality Row ──────────────────────────── */
+/* Quality selector */
 .quality-row {
   display: flex;
   gap: 6px;
@@ -215,7 +215,7 @@ header .chip {
   color: var(--lime);
 }
 
-/* ── Drop Zone ────────────────────────────── */
+/* Drop zone */
 .dropzone {
   border: 2px dashed var(--border);
   border-radius: var(--r);
@@ -264,7 +264,7 @@ header .chip {
 .dropzone p { color: var(--text-faint); font-size: 0.8125rem; position: relative; z-index: 1; }
 #file-input { display: none; }
 
-/* ── Job Card ─────────────────────────────── */
+/* Job card */
 .job-area { margin-top: 20px; }
 
 .job-card {
@@ -320,7 +320,7 @@ header .chip {
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* ── Progress Bar ─────────────────────────── */
+/* Progress bar */
 .progress-track {
   height: 6px;
   background: var(--surface-3);
@@ -355,7 +355,7 @@ header .chip {
 }
 .progress-meta span { font-family: 'JetBrains Mono', monospace; font-size: 0.6875rem; font-variant-numeric: tabular-nums; }
 
-/* ── Result ───────────────────────────────── */
+/* Result stats */
 .result-stats {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -428,18 +428,17 @@ header .chip {
 .btn-another:hover { border-color: var(--text-dim); color: var(--text); }
 .btn-another:active { transform: scale(0.97); }
 
-/* ── Footer ──────────────────────────────── */
+/* Footer */
 footer {
   text-align: center; padding: 48px 0 32px;
   color: var(--text-faint); font-size: 0.75rem;
   line-height: 1.7;
 }
 
-/* ── Result params line ──────────────────── */
 .result-params { font-size: 0.6875rem; color: var(--text-faint); }
 .result-note { color: var(--yellow); font-size: 0.75rem; text-align: center; margin-bottom: 12px; }
 
-/* ── Focus styles ────────────────────────── */
+/* Keyboard focus — only show on keyboard nav, not click */
 .preset:focus-visible,
 .q-btn:focus-visible,
 .btn-download:focus-visible,
@@ -449,7 +448,7 @@ footer {
 }
 .dropzone:focus-visible { outline: 2px solid var(--lime-light); outline-offset: 2px; }
 
-/* ── Responsive ──────────────────────────── */
+/* Responsive — on small screens stack the stat boxes vertically */
 @media (max-width: 520px) {
   .result-stats { grid-template-columns: 1fr; gap: 8px; }
   .stat-arrow { transform: rotate(90deg); }
@@ -458,10 +457,10 @@ footer {
   .q-btn { min-height: 44px; padding: 10px 14px; }
 }
 
-/* ── Stop shimmer when done ──────────────── */
+/* Stop the shimmer once encoding is done */
 .progress-fill.complete::after { animation: none; opacity: 0; }
 
-/* ── Respect reduced motion ──────────────── */
+/* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   .bg-art .orb { animation: none; }
   .progress-fill::after { animation: none; }
@@ -499,7 +498,7 @@ footer {
   <p>Pick your limit, drop your clip, and get a file that actually fits. No guessing, no fiddling.</p>
 </section>
 
-<!-- Discord size tier presets -->
+<!-- Discord upload tier presets — the data-mb value is sent to the server as the target ceiling -->
 <div class="presets" id="presets">
   <button class="preset active" data-mb="10">
     10 MB <span class="tier">Free</span>
@@ -518,7 +517,7 @@ footer {
   </button>
 </div>
 
-<!-- Quality presets -->
+<!-- Quality modes — tooltips explain the tradeoff so users can make an informed choice -->
 <div class="quality-row" id="quality-row">
   <button class="q-btn" data-q="quality" title="Best-looking video. File may be larger — use when quality matters most.">Best Quality</button>
   <button class="q-btn active" data-q="balanced" title="Good quality with a smaller file. The right choice for most clips.">Balanced</button>
@@ -526,7 +525,6 @@ footer {
   <button class="q-btn" data-q="extreme" title="Smallest possible file. Quality will be reduced — use only when the size limit is really tight.">Extreme (Tiny)</button>
 </div>
 
-<!-- Drop zone -->
 <div class="dropzone" id="dropzone">
   <svg class="dz-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
@@ -536,9 +534,10 @@ footer {
   <h3>Drop a video, or <span>browse</span></h3>
   <p>MP4, MOV, AVI, MKV, WebM, and more</p>
 </div>
+<!-- Hidden file input — triggered by clicking the dropzone -->
 <input type="file" id="file-input" accept="video/*,.mp4,.mov,.avi,.mkv,.webm,.flv,.wmv,.m4v,.3gp,.ts,.mts">
 
-<!-- Job area -->
+<!-- Job cards get injected here by JS as uploads come in -->
 <div class="job-area" id="job-area"></div>
 
 <footer>
@@ -548,7 +547,9 @@ footer {
 </div>
 
 <script>
-// ── Error sanitizer ─────────────────────────
+// Raw server/ffmpeg errors are noisy and scary for users. This maps known
+// patterns to plain language, and falls back to a generic message for anything
+// that looks like an internal stack trace.
 function friendlyError(msg) {
   if (!msg) return 'Something went wrong. Please try again.';
   const m = msg.toLowerCase();
@@ -560,26 +561,28 @@ function friendlyError(msg) {
     return 'Upload failed. Check your connection and try again.';
   if (m.includes('duration') || m.includes('cannot determine'))
     return 'Couldn\'t read the video duration. Try a different file.';
+  // Short messages that don't look like tracebacks are probably safe to show verbatim
   if (msg.length < 80 && !m.includes('traceback') && !m.includes('exception') && !m.includes('error:'))
     return msg;
   return 'Something went wrong. Try again with a different file.';
 }
 
-// ── HTML sanitizer ───────────────────────────
+// Escape user-provided strings before inserting into innerHTML to prevent XSS
 function escHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ── State ────────────────────────────────────
+// Global job state — only one compression job can be active at a time
 let targetMB = 10;
 let quality = 'balanced';
 let currentJob = null;
 let activePoll = null;
 let activeXHR = null;
 
-// ── Presets ──────────────────────────────────
+// Preset and quality buttons are purely cosmetic — they just update the state
+// variables that get sent with the next upload
 document.querySelectorAll('.preset').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
@@ -596,7 +599,7 @@ document.querySelectorAll('.q-btn').forEach(btn => {
   });
 });
 
-// ── Dropzone ────────────────────────────────
+// Wire up the dropzone — both drag-and-drop and click-to-browse go through the same uploadFile path
 const dz = document.getElementById('dropzone');
 const fi = document.getElementById('file-input');
 
@@ -609,10 +612,9 @@ dz.addEventListener('drop', e => {
 });
 fi.addEventListener('change', () => {
   if (fi.files.length) uploadFile(fi.files[0]);
-  fi.value = '';
+  fi.value = ''; // Reset so the same file can be re-selected if needed
 });
 
-// ── Helpers ─────────────────────────────────
 function fmtSize(bytes) {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
@@ -620,7 +622,7 @@ function fmtSize(bytes) {
   return (bytes/1073741824).toFixed(2) + ' GB';
 }
 
-// ── Card DOM helpers ─────────────────────────
+// Build the initial job card HTML — shown immediately on upload start
 function thumbHtml(thumbURL) {
   return thumbURL ? `<video src="${thumbURL}" muted playsinline></video>` : '';
 }
@@ -647,7 +649,8 @@ function buildJobCard(file, thumbURL, statusClass, statusText, progress, label) 
     </div>`;
 }
 
-// Update only the dynamic parts — no innerHTML replacement, no animation re-trigger
+// Patch only the dynamic parts of an existing card — avoids re-triggering
+// the popIn animation on every poll tick
 function updateCardInPlace(statusClass, statusText, progress, label) {
   const chip = document.getElementById('job-status-chip');
   const fill = document.getElementById('progress-fill');
@@ -662,13 +665,13 @@ function updateCardInPlace(statusClass, statusText, progress, label) {
   if (pctEl) pctEl.textContent = progress + '%';
 }
 
-// ── Upload & Compress ───────────────────────
 async function uploadFile(file) {
-  // Cancel any in-flight job
+  // Cancel any in-flight job so we don't end up polling two jobs at once
   if (activeXHR) { activeXHR.abort(); activeXHR = null; }
   if (activePoll) { clearInterval(activePoll); activePoll = null; }
 
-  // Warn before uploading very large files
+  // Warn before uploading very large files — the server will accept them, but
+  // it can take a while and the user should know what they're getting into
   if (file.size > 2 * 1024 * 1024 * 1024) {
     if (!confirm(`This file is ${fmtSize(file.size)} — it may take a while to upload and compress. Continue?`)) return;
   }
@@ -683,6 +686,7 @@ async function uploadFile(file) {
   form.append('quality', quality);
 
   try {
+    // Use XHR instead of fetch so we can track upload progress
     const xhr = new XMLHttpRequest();
     activeXHR = xhr;
     const uploadPromise = new Promise((resolve, reject) => {
@@ -712,6 +716,7 @@ async function uploadFile(file) {
 
     if (data.error) { showError(area, friendlyError(data.error)); return; }
 
+    // Persist the job ID so we can resume if the user refreshes
     currentJob = data.job_id;
     localStorage.setItem('squishit_job', JSON.stringify({
       jobId: data.job_id, fileName: file.name, fileSize: file.size, targetMB
@@ -720,11 +725,13 @@ async function uploadFile(file) {
 
   } catch (err) {
     activeXHR = null;
-    if (err.message === '__aborted__') return;
+    if (err.message === '__aborted__') return; // Aborted by the user dropping a new file — not an error
     showError(document.getElementById('job-area'), friendlyError(err.message));
   }
 }
 
+// Poll the server every 800ms. The server drives the state machine
+// (analyzing -> compressing pass 1 -> pass 2 -> done/error), we just reflect it.
 function pollStatus(jobId, file, thumbURL) {
   const area = document.getElementById('job-area');
   if (activePoll) clearInterval(activePoll);
@@ -745,7 +752,7 @@ function pollStatus(jobId, file, thumbURL) {
         clearInterval(activePoll); activePoll = null;
         showError(area, friendlyError(d.error));
       }
-    } catch { /* network hiccup — retry next tick */ }
+    } catch { /* Network hiccup — the interval will retry on the next tick */ }
   }, 800);
 }
 
@@ -814,7 +821,8 @@ function reset() {
   currentJob = null;
 }
 
-// ── Session restore on page load ─────────────
+// On page load, check if a job was in progress when the user last left.
+// If the job is still running on the server, reconnect to it automatically.
 (function restoreSession() {
   const saved = localStorage.getItem('squishit_job');
   if (!saved) return;
