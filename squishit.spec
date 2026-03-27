@@ -31,11 +31,13 @@ exe = EXE(
     a.binaries,
     a.zipfiles,
     a.datas,
+    [],             # onefile: merge everything into the exe
     name='SquishIt',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True,   # Keep console so users can see progress/errors
+    runtime_tmpdir=None,
+    console=True,
     icon=None,
 )
