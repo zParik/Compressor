@@ -33,18 +33,15 @@ jobs:
         run: pip install flask pyinstaller
 
       # ── ffmpeg: Windows ──────────────────────────────────────────
-      - name: Download ffmpeg (Windows)
+      - name: Install ffmpeg (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          winget install --id Gyan.FFmpeg.Essentials -e --silent --accept-source-agreements --accept-package-agreements
+          $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
           New-Item -ItemType Directory -Force -Path ffmpeg
-          $url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
-          Invoke-WebRequest -Uri $url -OutFile ffmpeg_tmp.zip -UseBasicParsing
-          Expand-Archive -Path ffmpeg_tmp.zip -DestinationPath ffmpeg_extracted -Force
-          $bin = Get-ChildItem ffmpeg_extracted -Recurse -Filter ffmpeg.exe | Select-Object -First 1
-          Copy-Item $bin.FullName ffmpeg\ffmpeg.exe
-          $bin2 = Get-ChildItem ffmpeg_extracted -Recurse -Filter ffprobe.exe | Select-Object -First 1
-          Copy-Item $bin2.FullName ffmpeg\ffprobe.exe
+          Copy-Item (Get-Command ffmpeg).Source  ffmpeg\ffmpeg.exe
+          Copy-Item (Get-Command ffprobe).Source ffmpeg\ffprobe.exe
 
       # ── ffmpeg: Linux ────────────────────────────────────────────
       - name: Download ffmpeg (Linux)
