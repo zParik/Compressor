@@ -51,12 +51,10 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           mkdir -p ffmpeg
-          curl -L "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz" -o ffmpeg_tmp.tar.xz
-          mkdir ffmpeg_extracted
-          tar -xf ffmpeg_tmp.tar.xz -C ffmpeg_extracted --strip-components=1
-          cp ffmpeg_extracted/ffmpeg ffmpeg/
-          cp ffmpeg_extracted/ffprobe ffmpeg/
-          chmod +x ffmpeg/ffmpeg ffmpeg/ffprobe
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          cp "$(which ffmpeg)" ffmpeg/
+          cp "$(which ffprobe)" ffmpeg/
 
       # ── ffmpeg: Mac ──────────────────────────────────────────────
       - name: Download ffmpeg (Mac)
