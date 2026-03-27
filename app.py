@@ -354,7 +354,11 @@ def download(job_id):
     job = jobs.get(job_id)
     if not job or job["status"] != "done":
         return jsonify({"error": "Not ready"}), 404
-    return send_file(job["output_path"], as_attachment=True)
+    output_path = job["output_path"]
+    response = send_file(output_path, as_attachment=True)
+    output_path.unlink(missing_ok=True)
+    job["status"] = "downloaded"
+    return response
 
 if __name__ == "__main__":
     import webbrowser
