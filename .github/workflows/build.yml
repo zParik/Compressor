@@ -30,7 +30,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install Python deps
-        run: pip install --user flask pyinstaller
+        run: pip install flask pyinstaller
 
       # ── ffmpeg: Windows ──────────────────────────────────────────
       - name: Download ffmpeg (Windows)
@@ -69,7 +69,7 @@ jobs:
 
       # ── Build ────────────────────────────────────────────────────
       - name: Build with PyInstaller
-        run: pyinstaller squishit.spec --noconfirm --clean
+        run: python -m PyInstaller squishit.spec --noconfirm --clean
 
       - name: Rename binary
         shell: bash
