@@ -7,7 +7,7 @@ Uses two-pass encoding for precise file size targeting.
 
 import os, sys, uuid, subprocess, json, time, threading, math, shutil, tempfile
 from pathlib import Path
-from flask import Flask, request, jsonify, send_from_directory, send_file
+from flask import Flask, request, jsonify, send_from_directory, send_file, after_this_request
 
 # Support PyInstaller frozen exe and normal Python
 if getattr(sys, "frozen", False):
@@ -36,8 +36,15 @@ jobs = {}  # job_id -> {status, progress, error, output_path, ...}
 
 def cleanup_old_files():
     while True:
-        time.sleep(1800)
+        time.sleep(60)
         now = time.time()
+        # Delete output files for completed downloads
+        for job in list(jobs.values()):
+            if job.get("status") == "downloaded":
+                path = job.get("output_path")
+                if path:
+                    path.unlink(missing_ok=True)
+        # Delete any leftover files older than 1 hour
         for d in [UPLOAD_DIR, OUTPUT_DIR]:
             for f in d.iterdir():
                 if f.is_file() and now - f.stat().st_mtime > 3600:
@@ -355,10 +362,8 @@ def download(job_id):
     if not job or job["status"] != "done":
         return jsonify({"error": "Not ready"}), 404
     output_path = job["output_path"]
-    response = send_file(output_path, as_attachment=True)
-    output_path.unlink(missing_ok=True)
     job["status"] = "downloaded"
-    return response
+    return send_file(output_path, as_attachment=True)
 
 if __name__ == "__main__":
     import webbrowser
