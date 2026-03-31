@@ -264,81 +264,111 @@ header .chip {
 .dropzone p { color: var(--text-faint); font-size: 0.8125rem; position: relative; z-index: 1; }
 #file-input { display: none; }
 
-/* Job card */
-.job-area { margin-top: 20px; }
+/* Batch action bar */
+.batch-bar {
+  display: none; align-items: center; gap: 8px;
+  margin-top: 20px; padding: 10px 14px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-sm); font-size: 0.75rem;
+}
+.batch-bar.visible { display: flex; }
+.batch-label { color: var(--text-dim); font-weight: 600; flex: 1; }
+.btn-batch {
+  padding: 6px 14px; border-radius: 100px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text-dim); font-family: inherit; font-size: 0.75rem; font-weight: 600;
+  cursor: pointer; transition: border-color 0.2s, color 0.2s;
+}
+.btn-batch:hover { border-color: var(--border-hi); color: var(--text); }
+.btn-batch.primary { border-color: var(--lime); background: var(--lime-dim); color: var(--lime-light); }
+.btn-batch.primary:hover { background: oklch(76% 0.17 128 / 0.2); }
+
+/* Compact job rows */
+.job-area { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
 
 .job-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 24px;
-  animation: popIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 10px 12px;
+  display: flex; align-items: center; gap: 10px;
+  animation: popIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @keyframes popIn {
-  from { opacity:0; transform: translateY(16px) scale(0.97); }
+  from { opacity:0; transform: translateY(8px) scale(0.98); }
   to { opacity:1; transform: translateY(0) scale(1); }
 }
-
-.job-header {
-  display: flex; align-items: center; gap: 14px;
-  margin-bottom: 20px;
-}
 .job-thumb {
-  width: 56px; height: 56px;
-  border-radius: 12px;
-  background: var(--surface-3);
+  width: 38px; height: 38px; border-radius: 7px;
+  background: var(--surface-3); flex-shrink: 0; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  overflow: hidden;
 }
-.job-thumb video { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
-.job-info { flex: 1; min-width: 0; }
-.job-info h4 {
-  font-size: 0.875rem; font-weight: 700;
+.job-thumb video { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; }
+.job-body { flex: 1; min-width: 0; }
+.job-name {
+  font-size: 0.8125rem; font-weight: 700;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  margin-bottom: 3px;
+  line-height: 1.3; margin-bottom: 2px;
 }
-.job-info p { font-size: 0.75rem; color: var(--text-dim); }
-.job-info p span { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+.job-sub { font-size: 0.6875rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+.job-right { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
 
 .job-status {
-  font-size: 0.75rem; font-weight: 700;
-  padding: 5px 12px;
-  border-radius: 100px;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
+  font-size: 0.6875rem; font-weight: 700;
+  padding: 3px 9px; border-radius: 100px;
+  letter-spacing: 0.02em; white-space: nowrap;
   transition: background-color 0.25s, color 0.25s;
 }
+.job-status.queued { background: var(--yellow-dim); color: var(--yellow); opacity: 0.7; }
 .job-status.analyzing { background: var(--yellow-dim); color: var(--yellow); }
 .job-status.compressing { background: var(--lime-dim); color: var(--lime-light); animation: pulse 1.5s infinite; }
-.job-status.done { background: var(--green-dim); color: var(--green); animation: chipPop 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+.job-status.done { background: var(--green-dim); color: var(--green); animation: chipPop 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
 .job-status.error { background: var(--red-dim); color: var(--red); }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
 @keyframes chipPop {
   0% { transform: scale(0.8); opacity: 0; }
-  60% { transform: scale(1.08); }
+  60% { transform: scale(1.06); }
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* Progress bar */
-.progress-track {
-  height: 6px;
-  background: var(--surface-3);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 12px;
+/* Mini inline progress bar */
+.job-mini-bar {
+  width: 64px; height: 4px;
+  background: var(--surface-3); border-radius: 2px; overflow: hidden;
 }
-.progress-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: var(--lime);
+.job-mini-fill {
+  height: 100%; border-radius: 2px; background: var(--lime);
   transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
   position: relative;
 }
+.job-mini-fill::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: shimmer 1.5s infinite;
+}
+.job-mini-fill.complete::after { animation: none; opacity: 0; }
+.job-pct { font-size: 0.6875rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; min-width: 26px; text-align: right; }
+
+/* Done row: savings label */
+.job-savings { font-size: 0.6875rem; font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; color: var(--text-dim); white-space: nowrap; }
+.job-savings .cut { color: var(--green); background: var(--green-dim); padding: 2px 5px; border-radius: 4px; margin-left: 3px; }
+
+/* Small icon action buttons */
+.job-dl-btn, .job-dismiss-btn {
+  width: 28px; height: 28px; border-radius: 7px;
+  border: 1px solid var(--border); background: transparent;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s, background-color 0.2s, transform 0.1s;
+  flex-shrink: 0; text-decoration: none; color: inherit;
+}
+.job-dl-btn { border-color: var(--lime); background: var(--lime-dim); color: var(--lime-light); }
+.job-dl-btn:hover { background: oklch(76% 0.17 128 / 0.2); transform: translateY(-1px); }
+.job-dismiss-btn { color: var(--text-faint); }
+.job-dismiss-btn:hover { border-color: var(--border-hi); color: var(--text-dim); }
+.job-dismiss-btn:active, .job-dl-btn:active { transform: scale(0.93); }
+.job-dl-btn svg, .job-dismiss-btn svg { width: 13px; height: 13px; stroke-width: 2.5; }
+
+/* Placeholder shimmer (unused progress-fill kept for animation ref) */
 .progress-fill::after {
   content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
   animation: shimmer 1.5s infinite;
 }
 @keyframes shimmer {
@@ -346,87 +376,6 @@ header .chip {
   to { transform: translateX(100%); }
 }
 
-.progress-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: var(--text-dim);
-  margin-bottom: 16px;
-}
-.progress-meta span { font-family: 'JetBrains Mono', monospace; font-size: 0.6875rem; font-variant-numeric: tabular-nums; }
-
-/* Result stats */
-.result-stats {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 20px;
-}
-.stat-box {
-  text-align: center;
-  padding: 16px;
-  border-radius: var(--r-sm);
-  background: var(--surface-2);
-}
-.stat-box .label { font-size: 0.6875rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; font-weight: 600; }
-.stat-box .value { font-family: 'JetBrains Mono', monospace; font-size: 1.375rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.stat-unit { font-size: 0.8125rem; opacity: 0.7; }
-.stat-box.before .value { color: var(--text-dim); }
-.stat-box.after .value { color: var(--green); }
-.stat-arrow {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-}
-.stat-arrow svg { width: 24px; height: 24px; stroke: var(--text-faint); }
-.stat-arrow .pct {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.8125rem; font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--green);
-  background: var(--green-dim);
-  padding: 3px 10px;
-  border-radius: 6px;
-}
-
-.btn-download {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 16px;
-  border-radius: var(--r-sm);
-  border: none;
-  background: var(--lime);
-  color: var(--bg);
-  font-family: inherit;
-  font-size: 0.9375rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s, background-color 0.2s;
-  box-shadow: 0 4px 24px var(--lime-glow);
-  text-decoration: none;
-}
-.btn-download:hover { transform: translateY(-2px); box-shadow: 0 8px 32px var(--lime-glow); background: var(--lime-light); }
-.btn-download:active { transform: translateY(0) scale(0.99); box-shadow: 0 2px 12px var(--lime-glow); }
-.btn-download svg { width: 20px; height: 20px; }
-
-.btn-another {
-  display: block;
-  margin: 14px auto 0;
-  padding: 10px 24px;
-  border-radius: 100px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-dim);
-  font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, transform 0.1s;
-}
-.btn-another:hover { border-color: var(--text-dim); color: var(--text); }
-.btn-another:active { transform: scale(0.97); }
 
 /* Footer */
 footer {
@@ -435,35 +384,24 @@ footer {
   line-height: 1.7;
 }
 
-.result-params { font-size: 0.6875rem; color: var(--text-faint); }
-.result-note { color: var(--yellow); font-size: 0.75rem; text-align: center; margin-bottom: 12px; }
-
-/* Keyboard focus — only show on keyboard nav, not click */
-.preset:focus-visible,
-.q-btn:focus-visible,
-.btn-download:focus-visible,
-.btn-another:focus-visible {
-  outline: 2px solid var(--lime-light);
-  outline-offset: 3px;
+/* Keyboard focus */
+.preset:focus-visible, .q-btn:focus-visible, .job-dl-btn:focus-visible,
+.btn-batch:focus-visible, .job-dismiss-btn:focus-visible {
+  outline: 2px solid var(--lime-light); outline-offset: 3px;
 }
 .dropzone:focus-visible { outline: 2px solid var(--lime-light); outline-offset: 2px; }
 
-/* Responsive — on small screens stack the stat boxes vertically */
 @media (max-width: 520px) {
-  .result-stats { grid-template-columns: 1fr; gap: 8px; }
-  .stat-arrow { transform: rotate(90deg); }
   .presets { gap: 6px; }
   .preset { padding: 8px 12px; font-size: 12px; }
   .q-btn { min-height: 44px; padding: 10px 14px; }
+  .job-savings { display: none; }
 }
-
-/* Stop the shimmer once encoding is done */
-.progress-fill.complete::after { animation: none; opacity: 0; }
 
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   .bg-art .orb { animation: none; }
-  .progress-fill::after { animation: none; }
+  .job-mini-fill::after { animation: none; }
   .job-card { animation: none; }
   .job-status.done { animation: none; }
   .dropzone.drag-over .dz-arrow { animation: none; }
@@ -531,13 +469,20 @@ footer {
     <polyline points="17 8 12 3 7 8"/>
     <line x1="12" y1="3" x2="12" y2="15"/>
   </svg>
-  <h3>Drop a video, or <span>browse</span></h3>
-  <p>MP4, MOV, AVI, MKV, WebM, and more</p>
+  <h3>Drop videos, or <span>browse</span></h3>
+  <p>MP4, MOV, AVI, MKV, WebM and more &mdash; up to 10 at once, 2 compress in parallel</p>
 </div>
 <!-- Hidden file input — triggered by clicking the dropzone -->
-<input type="file" id="file-input" accept="video/*,.mp4,.mov,.avi,.mkv,.webm,.flv,.wmv,.m4v,.3gp,.ts,.mts">
+<input type="file" id="file-input" accept="video/*,.mp4,.mov,.avi,.mkv,.webm,.flv,.wmv,.m4v,.3gp,.ts,.mts" multiple>
 
-<!-- Job cards get injected here by JS as uploads come in -->
+<!-- Batch bar: shown when 1+ jobs exist -->
+<div class="batch-bar" id="batch-bar">
+  <span class="batch-label" id="batch-label"></span>
+  <button class="btn-batch primary" id="batch-dl-btn" onclick="downloadAll()" style="display:none">Download all ready</button>
+  <button class="btn-batch" onclick="clearAll()">Clear all</button>
+</div>
+
+<!-- Job rows get injected here -->
 <div class="job-area" id="job-area"></div>
 
 <footer>
@@ -547,9 +492,6 @@ footer {
 </div>
 
 <script>
-// Raw server/ffmpeg errors are noisy and scary for users. This maps known
-// patterns to plain language, and falls back to a generic message for anything
-// that looks like an internal stack trace.
 function friendlyError(msg) {
   if (!msg) return 'Something went wrong. Please try again.';
   const m = msg.toLowerCase();
@@ -561,28 +503,22 @@ function friendlyError(msg) {
     return 'Upload failed. Check your connection and try again.';
   if (m.includes('duration') || m.includes('cannot determine'))
     return 'Couldn\'t read the video duration. Try a different file.';
-  // Short messages that don't look like tracebacks are probably safe to show verbatim
   if (msg.length < 80 && !m.includes('traceback') && !m.includes('exception') && !m.includes('error:'))
     return msg;
   return 'Something went wrong. Try again with a different file.';
 }
 
-// Escape user-provided strings before inserting into innerHTML to prevent XSS
 function escHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// Global job state — only one compression job can be active at a time
 let targetMB = 10;
 let quality = 'balanced';
-let currentJob = null;
-let activePoll = null;
-let activeXHR = null;
+let cardCount = 0;
+const doneJobs = new Map(); // jobId -> download URL
 
-// Preset and quality buttons are purely cosmetic — they just update the state
-// variables that get sent with the next upload
 document.querySelectorAll('.preset').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
@@ -599,7 +535,6 @@ document.querySelectorAll('.q-btn').forEach(btn => {
   });
 });
 
-// Wire up the dropzone — both drag-and-drop and click-to-browse go through the same uploadFile path
 const dz = document.getElementById('dropzone');
 const fi = document.getElementById('file-input');
 
@@ -608,11 +543,11 @@ dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dra
 dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
 dz.addEventListener('drop', e => {
   e.preventDefault(); dz.classList.remove('drag-over');
-  if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]);
+  Array.from(e.dataTransfer.files).forEach(uploadFile);
 });
 fi.addEventListener('change', () => {
-  if (fi.files.length) uploadFile(fi.files[0]);
-  fi.value = ''; // Reset so the same file can be re-selected if needed
+  Array.from(fi.files).forEach(uploadFile);
+  fi.value = '';
 });
 
 function fmtSize(bytes) {
@@ -622,63 +557,71 @@ function fmtSize(bytes) {
   return (bytes/1073741824).toFixed(2) + ' GB';
 }
 
-// Build the initial job card HTML — shown immediately on upload start
-function thumbHtml(thumbURL) {
-  return thumbURL ? `<video src="${thumbURL}" muted playsinline></video>` : '';
+// SVG icons used in cards
+const ICON_DL = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+const ICON_X  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+
+function buildJobCard(cardId, file, thumbURL) {
+  const thumbContent = thumbURL ? `<video src="${thumbURL}" muted playsinline></video>` : '';
+  return `<div class="job-card">
+    <div class="job-thumb">${thumbContent}</div>
+    <div class="job-body">
+      <div class="job-name">${escHtml(file.name)}</div>
+      <div class="job-sub">${fmtSize(file.size)} &rarr; ${targetMB} MB</div>
+    </div>
+    <div class="job-right" data-right="${cardId}">
+      <div class="job-status analyzing" data-chip="${cardId}">Uploading...</div>
+    </div>
+    <button class="job-dismiss-btn" onclick="dismissCard('${escHtml(cardId)}')" title="Dismiss">${ICON_X}</button>
+  </div>`;
 }
 
-function buildJobCard(file, thumbURL, statusClass, statusText, progress, label) {
-  const completeClass = progress >= 100 ? ' complete' : '';
-  return `
-    <div class="job-card">
-      <div class="job-header">
-        <div class="job-thumb">${thumbHtml(thumbURL)}</div>
-        <div class="job-info">
-          <h4>${escHtml(file.name)}</h4>
-          <p><span>${fmtSize(file.size)}</span> &rarr; target <span>${targetMB} MB</span></p>
-        </div>
-        <div class="job-status ${statusClass}" id="job-status-chip">${statusText}</div>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill${completeClass}" id="progress-fill" style="width:${progress}%"></div>
-      </div>
-      <div class="progress-meta">
-        <span id="progress-label">${label}</span>
-        <span id="progress-pct">${progress}%</span>
-      </div>
-    </div>`;
-}
+function updateCard(cardId, statusClass, statusText, progress) {
+  const container = document.getElementById(cardId);
+  if (!container) return;
+  const chip = container.querySelector('[data-chip]');
+  const right = container.querySelector('[data-right]');
+  if (!chip || !right) return;
 
-// Patch only the dynamic parts of an existing card — avoids re-triggering
-// the popIn animation on every poll tick
-function updateCardInPlace(statusClass, statusText, progress, label) {
-  const chip = document.getElementById('job-status-chip');
-  const fill = document.getElementById('progress-fill');
-  const labelEl = document.getElementById('progress-label');
-  const pctEl = document.getElementById('progress-pct');
-  if (!chip || !fill) return;
   chip.className = `job-status ${statusClass}`;
   chip.textContent = statusText;
-  fill.style.width = progress + '%';
-  if (progress >= 100) fill.classList.add('complete');
-  if (labelEl) labelEl.textContent = label;
-  if (pctEl) pctEl.textContent = progress + '%';
+
+  // Update or create mini bar for compressing state
+  if (statusClass === 'compressing') {
+    let bar = right.querySelector('.job-mini-bar');
+    let pct = right.querySelector('.job-pct');
+    if (!bar) {
+      right.innerHTML = `<div class="job-mini-bar"><div class="job-mini-fill" data-fill="${cardId}" style="width:0%"></div></div><span class="job-pct" data-pct="${cardId}">0%</span><div class="job-status compressing" data-chip="${cardId}">${statusText}</div>`;
+      bar = right.querySelector('.job-mini-bar');
+      pct = right.querySelector('.job-pct');
+    }
+    const fill = right.querySelector('[data-fill]');
+    if (fill) { fill.style.width = progress + '%'; if (progress >= 100) fill.classList.add('complete'); }
+    if (pct) pct.textContent = progress + '%';
+    const c = right.querySelector('[data-chip]');
+    if (c) { c.className = `job-status ${statusClass}`; c.textContent = statusText; }
+  } else {
+    // Non-compressing: just the chip
+    if (!right.querySelector('[data-chip]') || right.querySelector('.job-mini-bar')) {
+      right.innerHTML = `<div class="job-status ${statusClass}" data-chip="${cardId}">${statusText}</div>`;
+    }
+  }
 }
 
 async function uploadFile(file) {
-  // Cancel any in-flight job so we don't end up polling two jobs at once
-  if (activeXHR) { activeXHR.abort(); activeXHR = null; }
-  if (activePoll) { clearInterval(activePoll); activePoll = null; }
-
-  // Warn before uploading very large files — the server will accept them, but
-  // it can take a while and the user should know what they're getting into
   if (file.size > 2 * 1024 * 1024 * 1024) {
     if (!confirm(`This file is ${fmtSize(file.size)} — it may take a while to upload and compress. Continue?`)) return;
   }
 
+  const cardId = 'jc-' + (++cardCount);
   const area = document.getElementById('job-area');
   const thumbURL = URL.createObjectURL(file);
-  area.innerHTML = buildJobCard(file, thumbURL, 'analyzing', 'Uploading...', 0, 'Uploading file...');
+
+  const cardEl = document.createElement('div');
+  cardEl.id = cardId;
+  cardEl.innerHTML = buildJobCard(cardId, file, thumbURL);
+  area.appendChild(cardEl);
+  updateBatchBar();
 
   const form = new FormData();
   form.append('file', file);
@@ -686,14 +629,13 @@ async function uploadFile(file) {
   form.append('quality', quality);
 
   try {
-    // Use XHR instead of fetch so we can track upload progress
     const xhr = new XMLHttpRequest();
-    activeXHR = xhr;
     const uploadPromise = new Promise((resolve, reject) => {
       xhr.upload.onprogress = e => {
         if (e.lengthComputable) {
           const pct = Math.round(e.loaded / e.total * 100);
-          updateCardInPlace('analyzing', 'Uploading...', pct, 'Uploading file...');
+          const chip = document.querySelector(`[data-chip="${cardId}"]`);
+          if (chip) chip.textContent = `${pct}%`;
         }
       };
       xhr.onload = () => {
@@ -706,145 +648,133 @@ async function uploadFile(file) {
         }
       };
       xhr.onerror = () => reject(new Error('Upload failed. Check your connection and try again.'));
-      xhr.onabort = () => reject(new Error('__aborted__'));
     });
 
     xhr.open('POST', '/api/upload');
     xhr.send(form);
     const data = await uploadPromise;
-    activeXHR = null;
 
-    if (data.error) { showError(area, friendlyError(data.error)); return; }
-
-    // Persist the job ID so we can resume if the user refreshes
-    currentJob = data.job_id;
-    localStorage.setItem('squishit_job', JSON.stringify({
-      jobId: data.job_id, fileName: file.name, fileSize: file.size, targetMB
-    }));
-    pollStatus(data.job_id, file, thumbURL);
+    if (data.error) { showCardError(cardId, friendlyError(data.error)); return; }
+    pollStatus(data.job_id, cardId, file, thumbURL);
 
   } catch (err) {
-    activeXHR = null;
-    if (err.message === '__aborted__') return; // Aborted by the user dropping a new file — not an error
-    showError(document.getElementById('job-area'), friendlyError(err.message));
+    showCardError(cardId, friendlyError(err.message));
   }
 }
 
-// Poll the server every 800ms. The server drives the state machine
-// (analyzing -> compressing pass 1 -> pass 2 -> done/error), we just reflect it.
-function pollStatus(jobId, file, thumbURL) {
-  const area = document.getElementById('job-area');
-  if (activePoll) clearInterval(activePoll);
-  activePoll = setInterval(async () => {
+function pollStatus(jobId, cardId, file, thumbURL) {
+  const interval = setInterval(async () => {
     try {
       const res = await fetch(`/api/status/${jobId}`);
       const d = await res.json();
 
-      if (d.status === 'analyzing') {
-        updateCardInPlace('analyzing', 'Analyzing...', 5, 'Reading video metadata...');
+      if (d.status === 'queued') {
+        updateCard(cardId, 'queued', 'Queued', 0);
+      } else if (d.status === 'analyzing') {
+        updateCard(cardId, 'analyzing', 'Analyzing...', 5);
       } else if (d.status === 'compressing') {
-        const passLabel = d.pass === 1 ? 'Pass 1 — Analyzing motion' : 'Pass 2 — Encoding';
-        updateCardInPlace('compressing', 'Compressing...', d.progress, passLabel);
+        const label = d.pass === 1 ? 'Pass 1' : 'Pass 2';
+        updateCard(cardId, 'compressing', label, d.progress);
       } else if (d.status === 'done') {
-        clearInterval(activePoll); activePoll = null;
-        showResult(area, file, thumbURL, d);
+        clearInterval(interval);
+        showCardResult(cardId, jobId, file, thumbURL, d);
       } else if (d.status === 'error') {
-        clearInterval(activePoll); activePoll = null;
-        showError(area, friendlyError(d.error));
+        clearInterval(interval);
+        showCardError(cardId, friendlyError(d.error));
       }
-    } catch { /* Network hiccup — the interval will retry on the next tick */ }
+    } catch { /* network hiccup — retry */ }
   }, 800);
 }
 
-function showResult(area, file, thumbURL, d) {
-  const inputMB = (d.input_size / 1048576).toFixed(1);
+function dismissCard(cardId) {
+  const el = document.getElementById(cardId);
+  if (el) el.remove();
+  updateBatchBar();
+}
+
+function showCardResult(cardId, jobId, file, thumbURL, d) {
+  const container = document.getElementById(cardId);
+  if (!container) return;
+
   const outputMB = (d.output_size / 1048576).toFixed(1);
-  const reduction = Math.round((1 - d.output_size / d.input_size) * 100);
+  const reduction = d.already_small ? null : Math.round((1 - d.output_size / d.input_size) * 100);
+  const thumbContent = thumbURL ? `<video src="${thumbURL}" muted playsinline></video>` : '';
+  const savingsHtml = reduction !== null
+    ? `<span class="job-savings">${(d.input_size/1048576).toFixed(1)}→${outputMB}MB<span class="cut">-${reduction}%</span></span>`
+    : `<span class="job-savings" style="color:var(--green)">Already OK</span>`;
 
-  const isSmall = d.already_small;
-  const note = d.note ? `<p class="result-note">${escHtml(d.note)}</p>` : '';
-  const params = d.params;
-  const paramsInfo = params ? `${params.width}x${params.height} &bull; ${params.video_bitrate_kbps}kbps video &bull; ${params.audio_bitrate_kbps}kbps audio` : '';
+  const dlUrl = `/api/download/${jobId}`;
+  doneJobs.set(jobId, dlUrl);
 
-  area.innerHTML = `
-    <div class="job-card">
-      <div class="job-header">
-        <div class="job-thumb">${thumbHtml(thumbURL)}</div>
-        <div class="job-info">
-          <h4>${escHtml(file.name)}</h4>
-          <p class="result-params">${paramsInfo}</p>
-        </div>
-        <div class="job-status done">${isSmall ? 'Already OK!' : 'Squished!'}</div>
-      </div>
-      ${isSmall ? '<p style="text-align:center;color:var(--green);font-size:14px;margin:12px 0">Already under the limit — no compression needed!</p>' : `
-      <div class="result-stats">
-        <div class="stat-box before">
-          <div class="label">Before</div>
-          <div class="value">${inputMB}<small class="stat-unit">MB</small></div>
-        </div>
-        <div class="stat-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><polyline points="5 12 12 12 19 12"/><polyline points="15 8 19 12 15 16"/></svg>
-          <div class="pct">-${reduction}%</div>
-        </div>
-        <div class="stat-box after">
-          <div class="label">After</div>
-          <div class="value">${outputMB}<small class="stat-unit">MB</small></div>
-        </div>
-      </div>
-      `}
-      ${note}
-      <a class="btn-download" href="/api/download/${currentJob}" download>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download Squished Video
-      </a>
-      <button class="btn-another" onclick="reset()">Squish another</button>
-    </div>`;
+  container.innerHTML = `<div class="job-card">
+    <div class="job-thumb">${thumbContent}</div>
+    <div class="job-body">
+      <div class="job-name">${escHtml(file.name)}</div>
+      <div class="job-sub">${fmtSize(file.size)}</div>
+    </div>
+    <div class="job-right">
+      ${savingsHtml}
+      <div class="job-status done">${d.already_small ? 'OK' : 'Done'}</div>
+      <a class="job-dl-btn" href="${dlUrl}" download title="Download">${ICON_DL}</a>
+    </div>
+    <button class="job-dismiss-btn" onclick="dismissCard('${escHtml(cardId)}')" title="Dismiss">${ICON_X}</button>
+  </div>`;
+
+  updateBatchBar();
 }
 
-function showError(area, msg) {
-  localStorage.removeItem('squishit_job');
-  area.innerHTML = `
-    <div class="job-card">
-      <div style="text-align:center;padding:16px 0">
-        <div class="job-status error" style="display:inline-block;margin-bottom:12px">Error</div>
-        <p style="color:var(--red);font-size:14px;margin-bottom:16px">${escHtml(msg)}</p>
-        <button class="btn-another" onclick="reset()">Try a different file</button>
-      </div>
-    </div>`;
+function showCardError(cardId, msg) {
+  const container = document.getElementById(cardId);
+  if (!container) return;
+  container.innerHTML = `<div class="job-card">
+    <div class="job-thumb" style="color:var(--text-faint)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div class="job-body">
+      <div class="job-name" style="color:var(--red)">${escHtml(msg)}</div>
+    </div>
+    <div class="job-right">
+      <div class="job-status error">Error</div>
+    </div>
+    <button class="job-dismiss-btn" onclick="dismissCard('${escHtml(cardId)}')" title="Dismiss">${ICON_X}</button>
+  </div>`;
 }
 
-function reset() {
-  if (activeXHR) { activeXHR.abort(); activeXHR = null; }
-  if (activePoll) { clearInterval(activePoll); activePoll = null; }
-  localStorage.removeItem('squishit_job');
+function updateBatchBar() {
+  const area = document.getElementById('job-area');
+  const bar = document.getElementById('batch-bar');
+  const label = document.getElementById('batch-label');
+  const dlBtn = document.getElementById('batch-dl-btn');
+  const total = area.children.length;
+
+  if (total === 0) {
+    bar.classList.remove('visible');
+    return;
+  }
+  bar.classList.add('visible');
+
+  const doneCount = doneJobs.size;
+  const inFlight = total - document.querySelectorAll('[data-chip]~*').length; // rough
+  label.textContent = total === 1 ? '1 file' : `${total} files${doneCount > 0 ? ` · ${doneCount} ready` : ''}`;
+  dlBtn.style.display = doneCount >= 2 ? '' : 'none';
+}
+
+function downloadAll() {
+  let delay = 0;
+  for (const [, url] of doneJobs) {
+    setTimeout(() => {
+      const a = document.createElement('a');
+      a.href = url; a.download = ''; a.click();
+    }, delay);
+    delay += 400;
+  }
+}
+
+function clearAll() {
   document.getElementById('job-area').innerHTML = '';
-  currentJob = null;
+  doneJobs.clear();
+  updateBatchBar();
 }
-
-// On page load, check if a job was in progress when the user last left.
-// If the job is still running on the server, reconnect to it automatically.
-(function restoreSession() {
-  const saved = localStorage.getItem('squishit_job');
-  if (!saved) return;
-  let state;
-  try { state = JSON.parse(saved); } catch { localStorage.removeItem('squishit_job'); return; }
-  const { jobId, fileName, fileSize } = state;
-  fetch(`/api/status/${jobId}`)
-    .then(r => r.ok ? r.json() : Promise.reject())
-    .then(d => {
-      if (!d || d.error || d.status === 'error') { localStorage.removeItem('squishit_job'); return; }
-      currentJob = jobId;
-      const area = document.getElementById('job-area');
-      const fakeFile = { name: fileName, size: fileSize || 0 };
-      if (d.status === 'done') {
-        showResult(area, fakeFile, null, d);
-      } else {
-        area.innerHTML = buildJobCard(fakeFile, null, 'analyzing', 'Reconnecting...', d.progress || 0, 'Reconnecting to your job...');
-        pollStatus(jobId, fakeFile, null);
-      }
-    })
-    .catch(() => localStorage.removeItem('squishit_job'));
-})();
 </script>
 </body>
 </html>

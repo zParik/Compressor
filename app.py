@@ -34,6 +34,9 @@ if FFMPEG_DIR.exists():
 # Track job progress
 jobs = {}  # job_id -> {status, progress, error, output_path, ...}
 
+# Limit concurrent compressions to 2 — extras wait as "queued"
+compress_semaphore = threading.Semaphore(2)
+
 def cleanup_old_files():
     while True:
         time.sleep(60)
@@ -172,97 +175,102 @@ def compute_encoding_params(info, target_mb, quality_preset):
 def compress_video(job_id, input_path, target_mb, quality_preset):
     """Run two-pass H.264 compression targeting a specific file size."""
     try:
-        jobs[job_id]["status"] = "analyzing"
-        info = get_video_info(input_path)
-        jobs[job_id]["input_info"] = info
+        # Wait for a free compression slot — max 2 run concurrently, rest stay "queued"
+        compress_semaphore.acquire()
+        try:
+            jobs[job_id]["status"] = "analyzing"
+            info = get_video_info(input_path)
+            jobs[job_id]["input_info"] = info
 
-        # Already small enough?
-        if info["file_size"] <= target_mb * 1024 * 1024:
+            # Already small enough?
+            if info["file_size"] <= target_mb * 1024 * 1024:
+                output_path = OUTPUT_DIR / f"{input_path.stem}_{job_id}.mp4"
+                shutil.copy2(str(input_path), str(output_path))
+                jobs[job_id]["status"] = "done"
+                jobs[job_id]["output_path"] = output_path
+                jobs[job_id]["output_size"] = info["file_size"]
+                jobs[job_id]["already_small"] = True
+                return
+
+            params = compute_encoding_params(info, target_mb, quality_preset)
+            jobs[job_id]["params"] = params
+            jobs[job_id]["status"] = "compressing"
+            jobs[job_id]["progress"] = 0
+
             output_path = OUTPUT_DIR / f"{input_path.stem}_{job_id}.mp4"
-            shutil.copy2(str(input_path), str(output_path))
+            passlog = UPLOAD_DIR / f"passlog_{job_id}"
+
+            vf_filters = []
+            if params["width"] != info["width"] or params["height"] != info["height"]:
+                vf_filters.append(f"scale={params['width']}:{params['height']}")
+            if params["fps"] != info["fps"]:
+                vf_filters.append(f"fps={params['fps']}")
+
+            vf = ",".join(vf_filters) if vf_filters else None
+            preset = "slow" if quality_preset == "quality" else "medium"
+
+            # ── Pass 1 ──
+            jobs[job_id]["pass"] = 1
+            cmd1 = ["ffmpeg", "-y", "-i", str(input_path)]
+            if vf:
+                cmd1 += ["-vf", vf]
+            cmd1 += [
+                "-c:v", "libx264", "-preset", preset,
+                "-b:v", f"{params['video_bitrate_kbps']}k",
+                "-pass", "1", "-passlogfile", str(passlog),
+                "-an", "-f", "null", os.devnull
+            ]
+
+            proc1 = subprocess.Popen(cmd1, stderr=subprocess.PIPE, text=True)
+            monitor_progress(proc1, job_id, info["duration"], 1)
+            if proc1.wait() != 0:
+                raise RuntimeError("Pass 1 failed")
+
+            # ── Pass 2 ──
+            jobs[job_id]["pass"] = 2
+            jobs[job_id]["progress"] = 50
+
+            cmd2 = ["ffmpeg", "-y", "-i", str(input_path)]
+            if vf:
+                cmd2 += ["-vf", vf]
+            cmd2 += [
+                "-c:v", "libx264", "-preset", preset,
+                "-b:v", f"{params['video_bitrate_kbps']}k",
+                "-pass", "2", "-passlogfile", str(passlog),
+                "-c:a", "aac", "-b:a", f"{params['audio_bitrate_kbps']}k",
+                "-movflags", "+faststart",
+                str(output_path)
+            ]
+
+            proc2 = subprocess.Popen(cmd2, stderr=subprocess.PIPE, text=True)
+            monitor_progress(proc2, job_id, info["duration"], 2)
+            if proc2.wait() != 0:
+                raise RuntimeError("Pass 2 failed")
+
+            # Verify output
+            if not output_path.exists():
+                raise RuntimeError("Output file not created")
+
+            output_size = output_path.stat().st_size
+
+            # If still too big (rare with 2-pass), do a quick trim attempt
+            if output_size > target_mb * 1024 * 1024 * 1.05:
+                jobs[job_id]["note"] = f"Slightly over target ({round(output_size/1024/1024, 1)}MB)"
+
+            # Clean up passlog files
+            for f in UPLOAD_DIR.glob(f"passlog_{job_id}*"):
+                f.unlink(missing_ok=True)
+
             jobs[job_id]["status"] = "done"
             jobs[job_id]["output_path"] = output_path
-            jobs[job_id]["output_size"] = info["file_size"]
-            jobs[job_id]["already_small"] = True
-            return
+            jobs[job_id]["output_size"] = output_size
+            jobs[job_id]["progress"] = 100
 
-        params = compute_encoding_params(info, target_mb, quality_preset)
-        jobs[job_id]["params"] = params
-        jobs[job_id]["status"] = "compressing"
-        jobs[job_id]["progress"] = 0
-
-        output_path = OUTPUT_DIR / f"{input_path.stem}_{job_id}.mp4"
-        passlog = UPLOAD_DIR / f"passlog_{job_id}"
-
-        vf_filters = []
-        if params["width"] != info["width"] or params["height"] != info["height"]:
-            vf_filters.append(f"scale={params['width']}:{params['height']}")
-        if params["fps"] != info["fps"]:
-            vf_filters.append(f"fps={params['fps']}")
-
-        vf = ",".join(vf_filters) if vf_filters else None
-        preset = "slow" if quality_preset == "quality" else "medium"
-
-        # ── Pass 1 ──
-        jobs[job_id]["pass"] = 1
-        cmd1 = ["ffmpeg", "-y", "-i", str(input_path)]
-        if vf:
-            cmd1 += ["-vf", vf]
-        cmd1 += [
-            "-c:v", "libx264", "-preset", preset,
-            "-b:v", f"{params['video_bitrate_kbps']}k",
-            "-pass", "1", "-passlogfile", str(passlog),
-            "-an", "-f", "null", os.devnull
-        ]
-
-        proc1 = subprocess.Popen(cmd1, stderr=subprocess.PIPE, text=True)
-        monitor_progress(proc1, job_id, info["duration"], 1)
-        if proc1.wait() != 0:
-            raise RuntimeError("Pass 1 failed")
-
-        # ── Pass 2 ──
-        jobs[job_id]["pass"] = 2
-        jobs[job_id]["progress"] = 50
-
-        cmd2 = ["ffmpeg", "-y", "-i", str(input_path)]
-        if vf:
-            cmd2 += ["-vf", vf]
-        cmd2 += [
-            "-c:v", "libx264", "-preset", preset,
-            "-b:v", f"{params['video_bitrate_kbps']}k",
-            "-pass", "2", "-passlogfile", str(passlog),
-            "-c:a", "aac", "-b:a", f"{params['audio_bitrate_kbps']}k",
-            "-movflags", "+faststart",
-            str(output_path)
-        ]
-
-        proc2 = subprocess.Popen(cmd2, stderr=subprocess.PIPE, text=True)
-        monitor_progress(proc2, job_id, info["duration"], 2)
-        if proc2.wait() != 0:
-            raise RuntimeError("Pass 2 failed")
-
-        # Verify output
-        if not output_path.exists():
-            raise RuntimeError("Output file not created")
-
-        output_size = output_path.stat().st_size
-
-        # If still too big (rare with 2-pass), do a quick trim attempt
-        if output_size > target_mb * 1024 * 1024 * 1.05:
-            jobs[job_id]["note"] = f"Slightly over target ({round(output_size/1024/1024, 1)}MB)"
-
-        # Clean up passlog files
-        for f in UPLOAD_DIR.glob(f"passlog_{job_id}*"):
-            f.unlink(missing_ok=True)
-
-        jobs[job_id]["status"] = "done"
-        jobs[job_id]["output_path"] = output_path
-        jobs[job_id]["output_size"] = output_size
-        jobs[job_id]["progress"] = 100
-
-    except Exception as e:
-        jobs[job_id]["status"] = "error"
-        jobs[job_id]["error"] = str(e)
+        except Exception as e:
+            jobs[job_id]["status"] = "error"
+            jobs[job_id]["error"] = str(e)
+        finally:
+            compress_semaphore.release()
     finally:
         input_path.unlink(missing_ok=True)
 
